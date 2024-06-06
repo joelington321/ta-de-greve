@@ -21,12 +21,18 @@
             font-size: 3em;
             font-weight: bold;
             color: #333;
+            margin-top: 20px;
         }
         .answer {
             font-size: 2.5em;
             font-weight: bold;
             color: red;
             margin-top: 20px;
+        }.obs {
+            font-size: 1em;
+            font-weight: bold;
+            color: #333;
+            margin-top: 35px;
         }
     </style>
 </head>
@@ -38,6 +44,52 @@
         <div class="answer">NÃO TEM DATA</div>
         <div class="question">QUANTO TEMPO JUNINHO NÃO PERGUNTA DA GREVE?</div>
         <div class="answer">0 DIAS, NOSSO RECORDE É 0 DIAS</div>
+        <div class="question">QUANTO TEMPO DE GREVE?</div>
+        <div class="answer" id="time-counter">Calculando...</div>
+        <div class="obs">Não se sabe quando volta, a única coisa que podemos confirmar é que a UFOP vai resolver da pior forma possível</div>
     </div>
+    <script>
+        async function fetchBrasiliaTime() {
+            try {
+                const response = await fetch('http://worldtimeapi.org/api/timezone/America/Sao_Paulo');
+                const data = await response.json();
+                return new Date(data.datetime);
+            } catch (error) {
+                console.error('Erro ao obter horário de Brasília:', error);
+                return null;
+            }
+        }
+
+        function calculateTimeSince(startDate, endDate) {
+            const totalMilliseconds = endDate - startDate;
+            const totalSeconds = Math.floor(totalMilliseconds / 1000);
+            const totalMinutes = Math.floor(totalSeconds / 60);
+            const totalHours = Math.floor(totalMinutes / 60);
+            const totalDays = Math.floor(totalHours / 24);
+
+            const days = totalDays;
+            const hours = totalHours % 24;
+            const minutes = totalMinutes % 60;
+            const seconds = totalSeconds % 60;
+
+            return { days, hours, minutes, seconds };
+        }
+
+        async function updateTimeCounter() {
+            const brasiliaTime = await fetchBrasiliaTime();
+            if (brasiliaTime) {
+                const startDate = new Date('2024-04-15T00:00:00');
+                const currentDate = brasiliaTime;
+                const timeSince = calculateTimeSince(startDate, currentDate);
+
+                document.getElementById('time-counter').innerText =
+                    `${timeSince.days} DIAS, ${timeSince.hours} HORAS, ${timeSince.minutes} MINUTOS E ${timeSince.seconds} SEGUNDOS`;
+            } else {
+                document.getElementById('time-counter').innerText = 'Erro ao calcular';
+            }
+        }
+
+        setInterval(updateTimeCounter, 1000); // Atualiza o contador a cada segundo
+    </script>
 </body>
 </html>
